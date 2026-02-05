@@ -126,7 +126,9 @@ export default function Login() {
   const loginMutation = useMutation({
     mutationFn: authAPI.login,
     onSuccess: async (data) => {
-      localStorage.setItem('access_token', data.access_token)
+      console.log(data?.data);
+      //debugger;
+      localStorage.setItem('access_token', data?.data?.access_token)
       localStorage.setItem('refresh_token', data.refresh_token)
       const user = await authAPI.getCurrentUser()
       setUser(user)

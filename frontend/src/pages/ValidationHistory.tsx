@@ -1,52 +1,63 @@
-import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { validationAPI } from '@/services/api'
-import Button from '@/components/ui/Button'
-import Input from '@/components/ui/Input'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
-import { formatDate, formatDuration } from '@/lib/utils'
-import { Search, Trash2, Eye, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
-import type { Validation } from '@/types'
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { validationAPI } from "@/services/api";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
+import { formatDate, formatDuration } from "@/lib/utils";
+import {
+  Search,
+  Trash2,
+  Eye,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+} from "lucide-react";
+import type { Validation } from "@/types";
 
 export default function ValidationHistory() {
-  const queryClient = useQueryClient()
-  const [page, setPage] = useState(1)
-  const [statusFilter, setStatusFilter] = useState<string>('')
-  const [selectedValidation, setSelectedValidation] = useState<Validation | null>(null)
+  const queryClient = useQueryClient();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [selectedValidation, setSelectedValidation] =
+    useState<Validation | null>(null);
 
-  const primaryGrayClass = "bg-zinc-800 hover:bg-zinc-700 text-white transition-colors"
-  
+  const primaryGrayClass =
+    "bg-zinc-800 hover:bg-zinc-700 text-white transition-colors";
 
   const { data, isLoading } = useQuery({
-    queryKey: ['validations', page, statusFilter],
-    queryFn: () => validationAPI.getValidations(page, 20, statusFilter || undefined),
-  })
+    queryKey: ["validations", page, statusFilter],
+    queryFn: () =>
+      validationAPI.getValidations(page, 20, statusFilter || undefined),
+  });
 
   const deleteMutation = useMutation({
     mutationFn: validationAPI.deleteValidation,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['validations'] })
-      alert('Validation deleted successfully')
+      queryClient.invalidateQueries({ queryKey: ["validations"] });
+      alert("Validation deleted successfully");
     },
     onError: (error: any) => {
-      alert(error.response?.data?.detail || 'Failed to delete validation')
+      alert(error.response?.data?.detail || "Failed to delete validation");
     },
-  })
+  });
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'success':
-        return <CheckCircle className="w-4 h-4 text-green-500" />
-      case 'failed':
-        return <XCircle className="w-4 h-4 text-red-500" />
+      case "success":
+        return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case "failed":
+        return <XCircle className="w-4 h-4 text-red-500" />;
       default:
-        return null
+        return null;
     }
-  }
+  };
 
-  const totalPages = data ? Math.ceil(data.total / data.page_size) : 0
- 
-  const sidebarColorClass = "bg-zinc-800 hover:bg-zinc-700 text-white transition-colors"
+  const totalPages = data ? Math.ceil(data.total / data.page_size) : 0;
+
+  const sidebarColorClass =
+    "bg-zinc-800 hover:bg-zinc-700 text-white transition-colors";
 
   return (
     <div className="space-y-6">
@@ -62,6 +73,11 @@ export default function ValidationHistory() {
               <Input
                 placeholder="Search by source..."
                 className="w-full"
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setPage(1); // Reset to page 1 when searching
+                }}
               />
             </div>
             <select
@@ -86,7 +102,9 @@ export default function ValidationHistory() {
           {isLoading ? (
             <p className="text-center py-8 text-muted-foreground">Loading...</p>
           ) : data?.items.length === 0 ? (
-            <p className="text-center py-8 text-muted-foreground">No validations found</p>
+            <p className="text-center py-8 text-muted-foreground">
+              No validations found
+            </p>
           ) : (
             <>
               <div className="overflow-x-auto">
@@ -103,20 +121,35 @@ export default function ValidationHistory() {
                   </thead>
                   <tbody>
                     {data?.items.map((validation) => (
-                      <tr key={validation.id} className="border-b hover:bg-muted/50">
+                      <tr
+                        key={validation.id}
+                        className="border-b hover:bg-muted/50"
+                      >
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-2">
-                            {getStatusIcon(validation.status)}
-                            <span className="capitalize">{validation.status}</span>
+                            {getStatusIcon(
+                              validation.is_valid ? "success" : "failed",
+                            )}
+
+                            {/* 2. Boolean values don't render in React. You must convert to a string */}
+                            <span className="capitalize">
+                              {validation.is_valid ? "success" : "failed"}
+                            </span>
                           </div>
                         </td>
-                        <td className="py-3 px-4 capitalize">{validation.validation_type}</td>
-                        <td className="py-3 px-4 max-w-xs truncate">{validation.source}</td>
-                        <td className="py-3 px-4">{formatDate(validation.created_at)}</td>
+                        <td className="py-3 px-4 capitalize">
+                          {validation.file_type}
+                        </td>
+                        <td className="py-3 px-4 max-w-xs truncate">
+                          {validation.file_name}
+                        </td>
+                        <td className="py-3 px-4">
+                          {formatDate(validation.created_at)}
+                        </td>
                         <td className="py-3 px-4">
                           {validation.execution_time
                             ? formatDuration(validation.execution_time)
-                            : 'N/A'}
+                            : "N/A"}
                         </td>
                         <td className="py-3 px-4 text-right">
                           <div className="flex justify-end gap-2">
@@ -131,8 +164,12 @@ export default function ValidationHistory() {
                               size="sm"
                               variant="ghost"
                               onClick={() => {
-                                if (confirm('Are you sure you want to delete this validation?')) {
-                                  deleteMutation.mutate(validation.id)
+                                if (
+                                  confirm(
+                                    "Are you sure you want to delete this validation?",
+                                  )
+                                ) {
+                                  deleteMutation.mutate(validation.id);
                                 }
                               }}
                             >
@@ -192,15 +229,21 @@ export default function ValidationHistory() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Status</p>
-                  <p className="font-medium capitalize">{selectedValidation.status}</p>
+                  <p className="font-medium capitalize">
+                    {selectedValidation.status}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Type</p>
-                  <p className="font-medium capitalize">{selectedValidation.validation_type}</p>
+                  <p className="font-medium capitalize">
+                    {selectedValidation.validation_type}
+                  </p>
                 </div>
                 <div className="col-span-2">
                   <p className="text-sm text-muted-foreground">Source</p>
-                  <p className="font-medium break-all">{selectedValidation.source}</p>
+                  <p className="font-medium break-all">
+                    {selectedValidation.source}
+                  </p>
                 </div>
               </div>
 
@@ -213,15 +256,17 @@ export default function ValidationHistory() {
 
               {selectedValidation.error_details && (
                 <div>
-                  <p className="text-sm font-medium mb-2 text-destructive">Errors:</p>
+                  <p className="text-sm font-medium mb-2 text-destructive">
+                    Errors:
+                  </p>
                   <pre className="bg-destructive/10 p-4 rounded-md overflow-x-auto text-xs">
                     {JSON.stringify(selectedValidation.error_details, null, 2)}
                   </pre>
                 </div>
               )}
 
-              <Button 
-                onClick={() => setSelectedValidation(null)} 
+              <Button
+                onClick={() => setSelectedValidation(null)}
                 className={`w-full py-6 text-base font-semibold ${primaryGrayClass}`}
               >
                 Close Details
@@ -231,5 +276,5 @@ export default function ValidationHistory() {
         </div>
       )}
     </div>
-  )
+  );
 }

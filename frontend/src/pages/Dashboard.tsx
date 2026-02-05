@@ -5,15 +5,12 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { Activity, CheckCircle, XCircle, Clock, TrendingUp } from 'lucide-react'
 
 export default function Dashboard() {
-  const { data: metrics } = useQuery({
-    queryKey: ['dashboard-metrics'],
+const { data: response, isLoading } = useQuery({
+    queryKey: ['dashboard-stats'],
     queryFn: analyticsAPI.getDashboardMetrics,
   })
 
-  const { data: trends } = useQuery({
-    queryKey: ['trends', '7days'],
-    queryFn: () => analyticsAPI.getTrends('7days'),
-  })
+  const metrics = response?.data;
 
   const pieData = metrics
     ? [
@@ -90,7 +87,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={trends?.data || []}>
+              <LineChart data={metrics?.last7Days || []}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" />
                 <YAxis />

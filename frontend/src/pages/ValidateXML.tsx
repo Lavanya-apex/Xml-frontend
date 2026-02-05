@@ -147,7 +147,7 @@ export default function ValidateXML() {
           <CardContent>
             <div className="rounded-md bg-slate-900 p-4">
               <pre className="text-xs text-slate-100 overflow-auto max-h-[400px]">
-                {JSON.stringify(validationResult.results, null, 2)}
+                {JSON.stringify(validationResult.data)}
               </pre>
             </div>
           </CardContent>

@@ -338,20 +338,18 @@ export const authAPI = {
     formData.append('username', credentials.email)
     formData.append('password', credentials.password)
     
-    const response = await api.post('/api/v1/auth/login', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
+    const response = await api.post('/users/login', formData)
     return response.data
   },
 
   register: async (data: RegisterRequest): Promise<User> => {
-    const response = await api.post('/api/v1/auth/register', data)
+    const response = await api.post('/v1/users/', data)
     return response.data
   },
 
   getCurrentUser: async (): Promise<User> => {
-    const response = await api.get('/api/v1/users/me')
-    return response.data
+    const response = await api.get('/users/iam')
+    return response.data.data
   },
 }
 
@@ -363,14 +361,14 @@ export const validationAPI = {
     formData.append('file', file)
     if (elements) formData.append('required_elements', JSON.stringify(elements))
     if (types) formData.append('element_types', JSON.stringify(types))
-    const response = await api.post('/api/v1/validations/file', formData, {
+    const response = await api.post('/validate/', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
     return response.data
   },
 
   validateURL: async (url: string, elements?: string[], types?: Record<string, string>): Promise<Validation> => {
-    const response = await api.post('/api/v1/validations/url', {
+    const response = await api.post('/validate/url', {
       url,
       required_elements: elements,
       element_types: types,
@@ -378,14 +376,20 @@ export const validationAPI = {
     return response.data
   },
 
-  getValidations: async (page = 1, pageSize = 50): Promise<ValidationListResponse> => {
-    const response = await api.get('/api/v1/validations/', { params: { page, page_size: pageSize } })
-    return response.data
-  },
+getValidations: async (page = 1, pageSize = 10, status?: string): Promise<ValidationListResponse> => {
+  const response = await api.get('/validate/', { 
+    params: { 
+      page,          // Matches the backend 'page' parameter
+      size: pageSize, // Fixed typo: was 'size_size'
+      status: status || undefined        // Added status support since your component uses it
+    } 
+  });
+  return response.data.data;
+},
 
   getValidation: async (id: number): Promise<Validation> => {
     const response = await api.get(`/api/v1/validations/${id}`)
-    return response.data
+    return response.data.data
   },
 
   deleteValidation: async (id: number): Promise<void> => {
@@ -396,29 +400,22 @@ export const validationAPI = {
 // 6. Analytics API
 export const analyticsAPI = {
   getDashboardMetrics: async (): Promise<DashboardMetrics> => {
-    const response = await api.get('/api/v1/analytics/dashboard')
+    const response = await api.get('/validate/stats')
     return response.data
   },
-  getTrends: async (period: string = '7days'): Promise<TrendData[]> => {
-    const response = await api.get('/api/v1/analytics/trends', { params: { period } })
-    return response.data
-  },
-  getErrorAnalysis: async (): Promise<ErrorAnalysis[]> => {
-    const response = await api.get('/api/v1/analytics/errors')
-    return response.data
-  },
+  
 }
 
 
 // 7. User API
 export const userAPI = {
-  updateProfile: async (data: { full_name?: string; email?: string }): Promise<User> => {
-    const response = await api.put('/api/v1/users/me', data)
+  updateProfile: async (data: { name?: string; email?: string }): Promise<User> => {
+    const response = await api.put('/users/profileUpdate', data)
     return response.data
   },
 
   changePassword: async (currentPassword: string, newPassword: string): Promise<void> => {
-    await api.put('/api/v1/users/me/password', {
+    await api.post('/users/change-password', {
       current_password: currentPassword,
       new_password: newPassword,
     })
