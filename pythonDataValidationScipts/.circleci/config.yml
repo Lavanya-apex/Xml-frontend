@@ -1,0 +1,34 @@
+version: 2.1
+
+jobs:
+  test:
+    docker:
+      - image: circleci/python:3.10
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            python -m venv venv
+            . venv/bin/activate
+            pip install --upgrade pip
+            pip install -r requirements.txt
+      - run:
+          name: Run pytest with coverage and generate reports
+          command: |
+            . venv/bin/activate
+            pytest
+      - store_test_results:
+          path: reports
+      - store_artifacts:
+          path: logs
+          destination: logs
+      - store_artifacts:
+          path: reports
+          destination: reports
+
+workflows:
+  version: 2
+  test-workflow:
+    jobs:
+      - test
