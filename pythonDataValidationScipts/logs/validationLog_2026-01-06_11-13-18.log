@@ -1,0 +1,9 @@
+2026-01-06 11:24:46,706 - DEBUG - XML Error in oder3.xml at line 5, column 1
+2026-01-06 11:24:46,734 - DEBUG -        3:     <OrderId>5002</OrderId>
+2026-01-06 11:24:46,734 - DEBUG -        4:     <Amount>2200</Amount>
+2026-01-06 11:26:47,167 - DEBUG - XML Error in order4.xml at line 23, column 13
+2026-01-06 11:26:47,208 - DEBUG -       21:         <Item itemId="IT-2">
+2026-01-06 11:26:47,208 - DEBUG -       22:             <ProductName>Logitech Mouse</ProductName
+2026-01-06 11:26:47,208 - DEBUG - >>>   23:             <Quantity>3</Quantity>
+2026-01-06 11:26:47,270 - DEBUG -       24:             <UnitPrice currency="INR">1200</UnitPrice>
+2026-01-06 11:26:47,270 - DEBUG -       25:         </Item>
