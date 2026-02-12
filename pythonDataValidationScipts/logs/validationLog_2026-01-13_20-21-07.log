@@ -1,0 +1,3 @@
+2026-01-13 21:08:59,218 - DEBUG - XML Error in oder3.xml at line 5, column 1
+2026-01-13 21:08:59,244 - DEBUG -        3:     <OrderId>5002</OrderId>
+2026-01-13 21:08:59,244 - DEBUG -        4:     <Amount>2200</Amount>
